@@ -1,5 +1,5 @@
 import json
-import secrets
+import uuid
 from time import sleep, time
 from random import random
 from kafka import KafkaProducer
@@ -13,10 +13,13 @@ def value_serializer(data):
 
 
 def get_event():
+    types = ['AccountCreated', 'AccountDeleted']
+
     return {
-        'type': 'AccountCreated',
+        'id': str(uuid.uuid4()),
+        'type': types[int(random() * 2)],
         'payload': {
-            'user_id': secrets.token_hex(16),
+            'user_id': str(uuid.uuid4()),
             'timestamp': int(time())
         },
     }
@@ -30,8 +33,9 @@ producer = KafkaProducer(
 if __name__ == '__main__':
     while True:
         try:
-            ack = producer.send('dev_events', value=get_event())
-            ack.get()
-            sleep(int(random() * 3 + 1))
+            for _ in range(100):
+                ack = producer.send('dev_events', value=get_event())
+                ack.get()
+            sleep(1)
         except Exception as e:
             logger.exception(e)

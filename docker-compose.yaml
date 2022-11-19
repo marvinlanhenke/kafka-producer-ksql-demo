@@ -33,8 +33,9 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
   ksqldb-server:
-    image: confluentinc/ksqldb-server:latest
     container_name: ksqldb-server
+    image: confluentinc/ksqldb-server:latest
+    restart: unless-stopped
     depends_on:
       - kafka
     ports:
@@ -44,12 +45,14 @@ services:
       KSQL_BOOTSTRAP_SERVERS: kafka:9092
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: 'true'
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: 'true'
-      # KSQL_KSQL_QUERIES_FILE: /tmp/ksql-init.sql
 
   ksqldb-cli:
-    image: confluentinc/ksqldb-cli:latest
     container_name: ksqldb-cli
+    image: confluentinc/ksqldb-cli:latest
+    restart: unless-stopped
     depends_on:
       - ksqldb-server
     entrypoint: /bin/sh
+    volumes:
+      - ./ksql/ksql-init.sql:/tmp/ksql-init.sql
     tty: true
