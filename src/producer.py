@@ -1,3 +1,4 @@
+import os
 import json
 import uuid
 from time import sleep, time
@@ -26,14 +27,14 @@ def get_event():
 
 
 producer = KafkaProducer(
-    bootstrap_servers=['localhost:29092'],
+    bootstrap_servers=[os.environ['BOOTSTRAP_SERVERS']],
     value_serializer=value_serializer,
 )
 
 if __name__ == '__main__':
     while True:
         try:
-            for _ in range(100):
+            for _ in range(int(os.environ['NUM_MESSAGES'])):
                 ack = producer.send('dev_events', value=get_event())
                 ack.get()
             sleep(1)
